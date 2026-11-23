@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Orbit Daily</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#000;--panel:#0d0f12;--line:#23272d;--text:#e9ebee;--mute:#8b9199;--accent:#4a9eea;
+--sans:'Instrument Sans',system-ui,sans-serif;--serif:'Instrument Serif',Georgia,serif}
+*{box-sizing:border-box;margin:0;cursor:default;user-select:none;-webkit-user-select:none}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:16px/1.45 var(--sans);padding:20px 28px;display:grid;grid-template-rows:auto minmax(0,1fr) clamp(130px,19vh,190px);gap:18px;overflow:hidden}
+header{display:flex;flex-wrap:wrap;gap:12px 40px;align-items:flex-end;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.brand{font:400 32px/1 var(--serif)}.date{color:var(--mute);font-size:14px;margin-top:4px}
+.clocks{display:flex;gap:36px}
+.clock small{display:block;color:var(--mute);font-size:12px}
+.clock b{font:500 26px/1.1 var(--sans);font-variant-numeric:tabular-nums}
+main{display:grid;grid-template-columns:2fr 1fr;gap:20px;min-height:0}
+.left{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:18px;min-height:0}
+.lead{position:relative;border-radius:6px;overflow:hidden;background:var(--panel) center/cover;min-height:0}
+.lead .txt{position:absolute;inset:auto 0 0;padding:110px 28px 26px;background:linear-gradient(transparent,rgba(0,0,0,.95))}
+.lead h2{font:400 clamp(28px,4.6vh,52px)/1.08 var(--serif);margin:6px 0 8px;max-width:26em}
+.lead p{max-width:60ch;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta{color:var(--mute);font-size:13px}.lead .meta{color:#b8bdc6}
+.must{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.must h3{font:400 clamp(17px,2.6vh,24px)/1.2 var(--serif);margin-top:3px}
+.right{display:flex;flex-direction:column;gap:18px;min-height:0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 18px}
+.box h3{font-size:13px;color:var(--mute);font-weight:500;margin-bottom:4px}
+.big{font:500 34px/1.1 var(--sans);font-variant-numeric:tabular-nums;color:var(--accent);margin-bottom:6px}
+.launch{padding-top:8px;margin-top:8px;border-top:1px solid var(--line);font-size:14px}.launch b{font-weight:500;display:block}
+.news{flex:1;min-height:0;display:flex;flex-direction:column}
+.scroll{flex:1;min-height:0;overflow:hidden;position:relative;mask-image:linear-gradient(transparent,#000 6%,#000 94%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 6%,#000 94%,transparent)}
+.up{animation:up var(--d,120s) linear infinite}
+@keyframes up{to{transform:translateY(-50%)}}
+.item{display:grid;grid-template-columns:84px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.item img{width:84px;height:60px;object-fit:cover;border-radius:4px;background:var(--panel)}
+.item h4{font-weight:500;font-size:15px;line-height:1.3}
+.strip{overflow:hidden;position:relative;mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 3%,#000 97%,transparent)}
+.across{display:flex;gap:12px;height:100%;width:max-content;animation:across var(--d,150s) linear infinite}
+@keyframes across{to{transform:translateX(-50%)}}
+.pic{position:relative;height:100%;aspect-ratio:4/3;border-radius:6px;overflow:hidden;flex:none;background:var(--panel)}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.pic span{position:absolute;inset:auto 0 0;padding:22px 10px 8px;font-size:12px;line-height:1.3;background:linear-gradient(transparent,rgba(0,0,0,.9))}
+@media(prefers-reduced-motion:reduce){.up,.across{animation:none}}
+@media(max-width:820px){
+  html,body{height:auto}body{overflow:auto;grid-template-rows:none;padding:16px}
+  main{grid-template-columns:1fr}.left{grid-template-rows:none}.lead{height:340px}.must{grid-template-columns:1fr}
+  .news{height:420px;flex:none}.strip{height:140px}.clock b{font-size:20px}.clocks{gap:22px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="brand">Orbit Daily</div><div class="date" id="date"></div></div>
+  <div class="clocks">
+    <div class="clock"><small>Local time</small><b id="tLocal">--:--:--</b></div>
+    <div class="clock"><small>UTC</small><b id="tUtc">--:--:--</b></div>
+    <div class="clock"><small>ISS over</small><b id="iss" style="font-size:20px">locating…</b></div>
+  </div>
+</header>
+<main>
+  <div class="left">
+    <div class="lead" id="lead"></div>
+    <div class="must" id="must"></div>
+  </div>
+  <aside class="right">
+    <div class="box"><h3>Next launch</h3><div class="big" id="count">--</div><div id="launches"></div></div>
+    <div class="box news"><h3>Latest news</h3><div class="scroll"><div id="feed"></div></div></div>
+  </aside>
+</main>
+<div class="strip"><div class="across" id="photos"></div></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ago=d=>{const h=(Date.now()-new Date(d))/36e5;return h<1?Math.round(h*60)+'m ago':h<24?Math.round(h)+'h ago':Math.round(h/24)+'d ago'};
+let nextNet=null;
+
+function clocks(){
+  const n=new Date();
+  $('tLocal').textContent=n.toLocaleTimeString([], {hour12:false});
+  $('tUtc').textContent=n.toISOString().slice(11,19);
+  $('date').textContent=n.toLocaleDateString([], {weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  if(nextNet){
+    let s=Math.max(0,(nextNet-n)/1000),d=Math.floor(s/86400);s%=86400;
+    $('count').textContent=(d?d+'d ':'')+[Math.floor(s/3600),Math.floor(s%3600/60),Math.floor(s%60)].map(x=>String(x).padStart(2,'0')).join(':');
+  }
+}
+setInterval(clocks,1000);clocks();
+
+async function iss(){
+  try{const r=await (await fetch('https://api.wheretheiss.at/v1/satellites/25544')).json();
+    $('iss').textContent=`${Math.abs(r.latitude).toFixed(1)}°${r.latitude>=0?'N':'S'} ${Math.abs(r.longitude).toFixed(1)}°${r.longitude>=0?'E':'W'}`;
+  }catch{$('iss').textContent='unavailable'}
+}
+iss();setInterval(iss,15000);
+
+async function load(){
+  let data;
+  try{data=await (await fetch('/api/space')).json()}catch{$('lead').innerHTML='<div class="txt"><h2>News unavailable</h2></div>';return}
+  const arts=data.articles, [lead,...rest]=arts, must=rest.slice(0,3), used=new Set([lead,...must]);
+
+  if(lead){const l=$('lead');l.style.backgroundImage=`url("${esc(lead.image_url)}")`;
+    l.innerHTML=`<div class="txt"><div class="meta">${esc(lead.news_site)} · ${ago(lead.published_at)}</div><h2>${esc(lead.title)}</h2><p class="meta">${esc(lead.summary)}</p></div>`}
+  $('must').innerHTML=must.map(a=>`<div><div class="meta">${esc(a.news_site)} · ${ago(a.published_at)}</div><h3>${esc(a.title)}</h3></div>`).join('');
+
+  const ls=data.launches; if(ls[0])nextNet=new Date(ls[0].net);
+  $('launches').innerHTML=ls.slice(0,2).map(x=>`<div class="launch"><b>${esc(x.name)}</b><span class="meta">${new Date(x.net).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span></div>`).join('');
+
+  // Scrolling news: important stories, newest first, looped
+  const feed=arts.filter(a=>!used.has(a)&&a.important).sort((a,b)=>new Date(b.published_at)-new Date(a.published_at));
+  const rows=feed.map(a=>`<div class="item"><img src="${esc(a.image_url)}" alt=""><div><h4>${esc(a.title)}</h4><p class="meta">${esc(a.news_site)} · ${ago(a.published_at)}</p></div></div>`).join('');
+  const f=$('feed');f.className='up';f.style.setProperty('--d',Math.max(40,feed.length*7)+'s');f.innerHTML=rows+rows;
+
+  // Scrolling photos from every source, mixed with NASA's pictures
+  const pic=(src,cap)=>`<div class="pic"><img src="${esc(src)}" alt=""><span>${esc(cap)}</span></div>`;
+  const nasa=(data.apod||[]).filter(x=>x.media_type==='image').reverse().slice(0,3).map(x=>pic(x.url,'NASA · '+x.title));
+  const news=arts.filter(x=>x.important&&x.image_url).slice(0,14).map(x=>pic(x.image_url,x.news_site+' · '+x.title));
+  const mix=[];for(let i=0;i<Math.max(nasa.length,news.length);i++){if(news[i])mix.push(news[i]);if(nasa[i])mix.push(nasa[i])}
+  const ph=$('photos');ph.style.setProperty('--d',Math.max(40,mix.length*9)+'s');ph.innerHTML=mix.join('')+mix.join('');
+}
+load();setInterval(load,30*60*1000);
+</script>
+</body>
+</html>
